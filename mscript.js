@@ -35,13 +35,13 @@ let tasks = [];
 
 /*DOM Elements*/
 
-const taskInput = document.getElementById("taskTtitle");
+const taskInput = document.getElementById("tasktitle");
 const deadlineInput = document.getElementById("taskDeadline");
 const taskContainer = document.getElementById("taskContainer");
 
 const addBtn = document.getElementById("addTaskBtn");
-const saveBtn = document.getElementById("saveTasksBtn");
-const loadBtn = document.getElementById("loadTasksBtn");
+const saveBtn = document.getElementById("saveTaskBtn");
+const loadBtn = document.getElementById("loadTaskBtn");
 const markAllBtn = document.getElementById("markAllDoneBtn");
 
 
@@ -54,7 +54,7 @@ Task Type UI Logic
 taskTypeRadios.forEach(radio=>{
     radio.addEventListener('change',()=>{
         //disable the deadline input if the value of radio selected is not timed
-        deadlineInput.disable = radio.value!=='timed';
+        deadlineInput.disabled = radio.value!=='timed';
         if(deadlineInput.disabled){
             deadlineInput.value = "";
         }
@@ -85,7 +85,7 @@ function renderTasks(taskList, container){
     const cancleBtn = document.createElement("button");
     cancleBtn.textContent = "Cancle";
     cancleBtn.addEventListener('click', ()=>{
-        task.changeStus("cancelled");
+        task.changeStatus("cancelled");
         renderTasks(tasks, taskContainer);
     });
 
@@ -115,12 +115,12 @@ function renderTasks(taskList, container){
         li.append(
               title,
             doneBtn,
-            cancelBtn,
+            cancleBtn,
             deleteBtn,
             subInput,
             addSubBtn
         );
-
+    
           /* RENDER SUBTASKS (RECURSIVE) */
         if (task.subtasks.length > 0) {
             const subUl = document.createElement("ul");
@@ -131,6 +131,7 @@ function renderTasks(taskList, container){
         container.appendChild(li);
     
     })
+}
 
     /* =========================
    EVENT HANDLERS
@@ -161,7 +162,7 @@ addBtn.addEventListener('click',()=>{
     taskInput.value = "";
     deadlineInput.value = "";
 })
-}
+
 
 // MARK ALL DONE BUTTON
 markAllBtn.addEventListener('click',()=>{
@@ -177,7 +178,21 @@ saveBtn.addEventListener("click", () => {
 /* LOAD TASKS */
 loadBtn.addEventListener("click", () => {
     const data = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks = data;
+
+    
+    tasks = data.map(t =>{
+        let task;
+        if(t.deadline){
+            task = new TimedTask(t.title, t.deadline)
+        }
+        else{
+            task = new Task(t.title)
+        }
+
+        task.status = t.status;
+        task.subtasks = t.subtasks || [];
+        return task;
+    });
     renderTasks(tasks, taskContainer);
 });
 
